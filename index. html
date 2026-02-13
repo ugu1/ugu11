@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thunder Hub | منصة الخدمات الرقمية</title>
+    <style>
+        :root { --main: #00f3ff; --bg: #0d0d0f; --card: #161618; }
+        body { background: var(--bg); color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .hero { margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        .hero h1 { color: var(--main); font-size: 2rem; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: var(--card); border-radius: 15px; padding: 20px; border: 1px solid #222; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #333; background: #222; color: white; margin: 10px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; border-radius: 10px; border: none; background: var(--main); color: black; font-weight: bold; cursor: pointer; }
+        .inbox { background: #000; height: 120px; border-radius: 10px; margin-top: 10px; padding: 10px; overflow-y: auto; font-size: 0.8rem; border: 1px solid #222; }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <h1>Thunder Hub ⚡</h1>
+    <p>بريد مؤقت واختصار روابط حقيقي 100%</p>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>📧 بريد مؤقت حقيقي</h2>
+        <input type="text" id="mailAddr" readonly placeholder="إضغط للتوليد...">
+        <button onclick="genMail()">توليد بريد جديد</button>
+        <button onclick="readMail()" style="margin-top:10px; background:white;">تحديث الوارد 📥</button>
+        <div class="inbox" id="mailBox">الرسائل تظهر هنا...</div>
+    </div>
+
+    <div class="card">
+        <h2>🔗 اختصار الروابط</h2>
+        <input type="text" id="longUrl" placeholder="ضع الرابط الطويل هنا">
+        <button onclick="shorten()">اختصار الآن</button>
+        <input type="text" id="shortRes" readonly placeholder="الرابط المختصر">
+    </div>
+</div>
+
+<script>
+    let login = "", domain = "";
+    async function genMail() {
+        const res = await fetch("https://www.1secmail.com/api/v1/?action=genRandomMailbox&count=1");
+        const data = await res.json();
+        document.getElementById('mailAddr').value = data[0];
+        [login, domain] = data[0].split('@');
+    }
+
+    async function readMail() {
+        if(!login) return;
+        const res = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${login}&domain=${domain}`);
+        const msgs = await res.json();
+        document.getElementById('mailBox').innerHTML = msgs.map(m => `<div><b>من:</b> ${m.from}<br>${m.subject}</div>`).join('') || "لا رسائل بعد.";
+    }
+
+    async function shorten() {
+        const url = document.getElementById('longUrl').value;
+        if(!url) return;
+        const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(url)}`);
+        document.getElementById('shortRes').value = await res.text();
+    }
+</script>
+</body>
+</html>
